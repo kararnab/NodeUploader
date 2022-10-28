@@ -12,4 +12,4 @@ yarn start
 - Open web browser and go to http://localhost:2000
 - Click choose files
 - Press upload button
-- Files will be uploaded and stored in uploads folder
+- Files will be uploaded and stored in `uploadedFiles` folder

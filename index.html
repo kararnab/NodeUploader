@@ -5,14 +5,156 @@
     <title>Node js Express File Uploader</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="public/tus.min.js"></script>
+    <script>
+        const baseUrl = 'http://192.168.0.176:2000'
+        function onUploadTypeChange() {
+            const uploadType = document.getElementById("uploadType").value;
+            showUploader(uploadType)
+            //document.getElementById("demo").innerHTML = "Paragraph changed.";
+        }
+        function showUploader(uploadType='basic') {
+            switch (uploadType){
+                case 'basic':
+                    document.getElementById('basicUpload').hidden = false
+                    document.getElementById('advancedUpload').hidden = true
+                    break;
+                case 'advanced':
+                    document.getElementById('basicUpload').hidden = true
+                    document.getElementById('advancedUpload').hidden = false
+                    break;
+                default:
+                    break;
+            }
+        }
+        function showIpAddress() {
+            fetch(`${baseUrl}/ip-address`)
+                //.then((response) => response.json())
+                .then((response) => response.text())
+                .then((ip)=> {
+                    if (ip.substr(0, 7) === "::ffff:") {
+                        ip = ip.substr(7)
+                    }
+                    document.getElementById('ipAddress').innerText = ip
+                })
+                .catch(e=>{
+                    document.getElementById('ipAddress').innerText = 'UNKNOWN'
+                })
+
+        }
+        function initEventListeners() {
+            document.getElementById('moreBtn').addEventListener('click', onMoreBtnClick)
+            //document.getElementById('inputFileResumeAble')
+        }
+        function onMoreBtnClick(e) {
+            e?.stopPropagation();
+            e?.preventDefault();
+
+            const inputLine = document.createElement("input");
+            inputLine.setAttribute('id', 'inputFileResumeAble');
+            inputLine.setAttribute('type', 'file');
+            const progressBar = document.createElement("progress");
+            progressBar.setAttribute('id', 'progressBar')
+            progressBar.setAttribute('max', '100');
+            progressBar.setAttribute('value', '0');
+            progressBar.setAttribute('hidden', 'true');
+            const lineFeed = document.createElement("br");
+
+            const inputSet = document.getElementById('inputSet');
+            inputSet.appendChild(inputLine);
+            inputSet.appendChild(progressBar);
+            inputSet.appendChild(lineFeed);
+
+            document.getElementById('inputFileResumeAble').addEventListener('change', (event) => {
+                const progressBar = document.getElementById('progressBar')
+                progressBar.hidden = false
+
+                const fileList = event.target.files;
+                const file = fileList[0];
+                const upload = new tus.Upload(file, {
+                    endpoint: `${baseUrl}/uploads`,
+                    retryDelays: [0, 3000, 5000, 10000, 20000],
+                    metadata: {
+                        filename: file.name,
+                        filetype: file.type
+                    },
+                    onError: function(error) {
+                        console.log("Failed because: " + error)
+                        progressBar.style = 'accent-color: #dc2c31'
+                        progressBar.value = '100'
+                    },
+                    onProgress: function(bytesUploaded, bytesTotal) {
+                        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(0);
+                        console.log(bytesUploaded, bytesTotal, percentage + "%");
+                        progressBar.value = percentage
+                    },
+                    onSuccess: function() {
+                        console.log("Download %s from %s", upload.file.name, upload.url)
+                        progressBar.style = 'accent-color: #084b0b'
+                        progressBar.value = '100'
+                    }
+                });
+                // Check if there are any previous uploads to continue.
+                upload.findPreviousUploads().then(function (previousUploads) {
+                    // Found previous uploads so we select the first one.
+                    if (previousUploads.length) {
+                        upload.resumeFromPreviousUpload(previousUploads[0])
+                    }
+                    // Start the upload
+                    upload.start()
+                })
+            });
+        }
+        function onPageLoad() {
+            showUploader();
+            onMoreBtnClick();
+            showIpAddress();
+            initEventListeners();
+        }
+    </script>
 </head>
 
-<body>
-    <h1>Node js Express Multiple File Upload</h1>
+<body onload="onPageLoad()">
+<h1>Node Js Express File Upload</h1>
+
+<p>
+    This is an uploader utility to upload files.
+</p>
+
+<label for="uploadType">Upload Type:</label>
+<select
+        name="uploadType"
+        id="uploadType"
+        onchange="onUploadTypeChange()"
+>
+    <option value="basic">Basic</option>
+    <option value="advanced">Advanced</option>
+</select>
+
+<div id='basicUpload'>
     <form action="/upload" enctype="multipart/form-data" method="post">
-        <input type="file" name="multi-files" multiple>
-        <input type="submit" value="Upload">
+        <fieldset>
+            <legend>Basic File Uploader</legend>
+            <input type="file" name="multi-files" multiple>
+            <input type="submit" value="Upload">
+        </fieldset>
     </form>
+</div>
+
+<div id='advancedUpload'>
+    <form enctype="multipart/form-data" method="post">
+        <fieldset>
+            <legend>Advanced File Uploader</legend>
+            <div id="inputSet"></div>
+            <!--<button id="uploadBtn">Upload</button>-->
+            <!--<button id="moreBtn">More +</button>-->
+        </fieldset>
+    </form>
+</div>
+
+<footer style="padding-top: 2rem">
+    <b>Note:</b> Your IP Address might be recorded. Your IP: <b id="ipAddress">___.___.___.___</b>
+</footer>
 </body>
 
 </html>
