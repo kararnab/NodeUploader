@@ -1,6 +1,6 @@
 const express = require('express');
-const constants = require("./_helpers/constants");
-const tus = require("tus-node-server");
+const constants = require('./_helpers/constants');
+const tus = require('tus-node-server');
 const router = express.Router();
 const uploadApp = express();
 

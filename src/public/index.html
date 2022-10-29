@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <meta name="description" content="File Upload Utility">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="normalizer.css">
+    <link rel="stylesheet" href="multi-uploader.css">
     <script src="qrcode.min.js"></script>
     <script src="tus.min.js"></script>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -22,10 +24,17 @@
                 case 'basic':
                     document.getElementById('basicUpload').hidden = false;
                     document.getElementById('advancedUpload').hidden = true;
+                    document.getElementById('multiFileUpload').hidden = true;
                     break;
                 case 'advanced':
                     document.getElementById('basicUpload').hidden = true;
                     document.getElementById('advancedUpload').hidden = false;
+                    document.getElementById('multiFileUpload').hidden = true;
+                    break;
+                case 'multi-file':
+                    document.getElementById('basicUpload').hidden = true;
+                    document.getElementById('advancedUpload').hidden = true;
+                    document.getElementById('multiFileUpload').hidden = false;
                     break;
                 default:
                     break;
@@ -144,10 +153,11 @@
 >
     <option value="basic">Basic</option>
     <option value="advanced">Advanced</option>
+    <option value="multi-file">Multi-File</option>
 </select>
 
 <div id='basicUpload'>
-    <form action="/upload" enctype="multipart/form-data" method="post">
+    <form action="/basic-upload" enctype="multipart/form-data" method="post">
         <fieldset>
             <legend>Basic File Uploader</legend>
             <input type="file" name="multi-files" multiple>
@@ -165,6 +175,14 @@
             <!--<button id="moreBtn">More +</button>-->
         </fieldset>
     </form>
+</div>
+
+<div id='multiFileUpload'>
+    <label class="upload-btn">
+        Upload
+        <input type="file" multiple accept="video/*" id="file-upload-input" style="display: none;">
+    </label>
+    <script src="multi-uploader.js"></script>
 </div>
 
 <p>

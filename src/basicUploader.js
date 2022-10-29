@@ -32,7 +32,7 @@ const multi_upload = multer({
     },
 }).array('multi-files')
 
-router.post('/upload', (req, res) => {
+router.post('/basic-upload', (req, res) => {
     multi_upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
