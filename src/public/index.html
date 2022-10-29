@@ -4,47 +4,61 @@
 <head>
     <title>Node js Express File Uploader</title>
     <meta charset="UTF-8">
+    <meta name="description" content="File Upload Utility">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="public/tus.min.js"></script>
+    <script src="qrcode.min.js"></script>
+    <script src="tus.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tus-js-client@latest/dist/tus.min.js"></script>-->
     <script>
         const baseUrl = 'http://192.168.0.176:2000'
         function onUploadTypeChange() {
             const uploadType = document.getElementById("uploadType").value;
-            showUploader(uploadType)
+            showUploader(uploadType);
             //document.getElementById("demo").innerHTML = "Paragraph changed.";
         }
         function showUploader(uploadType='basic') {
             switch (uploadType){
                 case 'basic':
-                    document.getElementById('basicUpload').hidden = false
-                    document.getElementById('advancedUpload').hidden = true
+                    document.getElementById('basicUpload').hidden = false;
+                    document.getElementById('advancedUpload').hidden = true;
                     break;
                 case 'advanced':
-                    document.getElementById('basicUpload').hidden = true
-                    document.getElementById('advancedUpload').hidden = false
+                    document.getElementById('basicUpload').hidden = true;
+                    document.getElementById('advancedUpload').hidden = false;
                     break;
                 default:
                     break;
             }
         }
-        function showIpAddress() {
+        function showIpAddressAndQRCode() {
             fetch(`${baseUrl}/ip-address`)
                 //.then((response) => response.json())
                 .then((response) => response.text())
                 .then((ip)=> {
                     if (ip.substr(0, 7) === "::ffff:") {
-                        ip = ip.substr(7)
+                        ip = ip.substr(7);
                     }
-                    document.getElementById('ipAddress').innerText = ip
+                    document.getElementById('ipAddress').innerText = ip;
                 })
                 .catch(e=>{
-                    document.getElementById('ipAddress').innerText = 'UNKNOWN'
+                    document.getElementById('ipAddress').innerText = 'UNKNOWN';
                 })
+            generateQRCode(window.location.href);
+        }
 
+        function generateQRCode(text) {
+            new QRCode(document.querySelector(".qr-code"), {
+                text: `${text}`,
+                width: 100, //default 128
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
         function initEventListeners() {
-            document.getElementById('moreBtn').addEventListener('click', onMoreBtnClick)
-            //document.getElementById('inputFileResumeAble')
+            document.getElementById('moreBtn').addEventListener('click', onMoreBtnClick);
         }
         function onMoreBtnClick(e) {
             e?.stopPropagation();
@@ -66,8 +80,8 @@
             inputSet.appendChild(lineFeed);
 
             document.getElementById('inputFileResumeAble').addEventListener('change', (event) => {
-                const progressBar = document.getElementById('progressBar')
-                progressBar.hidden = false
+                const progressBar = document.getElementById('progressBar');
+                progressBar.hidden = false;
 
                 const fileList = event.target.files;
                 const file = fileList[0];
@@ -79,43 +93,44 @@
                         filetype: file.type
                     },
                     onError: function(error) {
-                        console.log("Failed because: " + error)
-                        progressBar.style = 'accent-color: #dc2c31'
-                        progressBar.value = '100'
+                        console.log("Failed because: " + error);
+                        progressBar.style = 'accent-color: #dc2c31';
+                        progressBar.value = '100';
                     },
                     onProgress: function(bytesUploaded, bytesTotal) {
                         const percentage = (bytesUploaded / bytesTotal * 100).toFixed(0);
                         console.log(bytesUploaded, bytesTotal, percentage + "%");
-                        progressBar.value = percentage
+                        progressBar.value = percentage;
                     },
                     onSuccess: function() {
-                        console.log("Download %s from %s", upload.file.name, upload.url)
-                        progressBar.style = 'accent-color: #084b0b'
-                        progressBar.value = '100'
+                        console.log("Download %s from %s", upload.file.name, upload.url);
+                        progressBar.style = 'accent-color: #084b0b';
+                        progressBar.value = '100';
                     }
                 });
                 // Check if there are any previous uploads to continue.
                 upload.findPreviousUploads().then(function (previousUploads) {
                     // Found previous uploads so we select the first one.
                     if (previousUploads.length) {
-                        upload.resumeFromPreviousUpload(previousUploads[0])
+                        upload.resumeFromPreviousUpload(previousUploads[0]);
                     }
                     // Start the upload
-                    upload.start()
+                    upload.start();
                 })
             });
         }
         function onPageLoad() {
             showUploader();
             onMoreBtnClick();
-            showIpAddress();
+            showIpAddressAndQRCode();
             initEventListeners();
         }
     </script>
 </head>
 
 <body onload="onPageLoad()">
-<h1>Node Js Express File Upload</h1>
+<h1>File Uploader Utility</h1>
+<hr />
 
 <p>
     This is an uploader utility to upload files.
@@ -152,6 +167,9 @@
     </form>
 </div>
 
+<p>
+    Scan the following QR to open this page <div class="qr-code"></div>
+</p>
 <footer style="padding-top: 2rem">
     <b>Note:</b> Your IP Address might be recorded. Your IP: <b id="ipAddress">___.___.___.___</b>
 </footer>

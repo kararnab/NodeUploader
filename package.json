@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Multiple File upload using NodeJs",
   "scripts": {
-    "start": "node file-uploader.js",
+    "start": "node src/uploader-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
