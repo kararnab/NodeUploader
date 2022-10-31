@@ -24,6 +24,7 @@ router.post('/upload-request', (req, res) => {
         res.status(400).json({message: 'Missing "fileName"'});
     } else {
         const fileId = uniqueAlphaNumericId();
+
         fs.createWriteStream(getFilePath(req.body.fileName, fileId), {flags: 'w'});
         res.status(200).json({fileId});
     }
@@ -71,9 +72,10 @@ router.post('/multi-upload', (req, res) => {
         return res.status(400).json({message: 'Invalid "Content-Range" provided'});
     }
 
-    const busboy = new Busboy({ headers: req.headers });
+    const busboy = Busboy({ headers: req.headers });
 
-    busboy.on('file', (_, file, fileName) => {
+    busboy.on('file', (_, file, info) => {
+        const fileName = info.filename
         const filePath = getFilePath(fileName, fileId);
         if (!fileId) {
             req.pause();

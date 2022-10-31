@@ -1,6 +1,10 @@
 # Upload Server
 ## Description
-Multiple File upload using NodeJs
+Demonstrating multiple ways to file upload.
+
+## Requirements
+
+* [node.js](http://nodejs.org/) -- v18.12.0 or newer
 
 ## Setup
 ```
